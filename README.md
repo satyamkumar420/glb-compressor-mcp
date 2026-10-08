@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/banner.svg" alt="GLB Compressor MCP Banner" width="100%" />
+</p>
+
 # ⚡ GLB Compressor MCP Server
 
 > High-fidelity 3D model compression and optimization Model Context Protocol (MCP) server with **zero visual quality degradation**. Deployable natively to **Cloudflare Workers** (Streamable HTTP / SSE) or locally as a stdio MCP server.
@@ -27,11 +31,13 @@
 
 ---
 
-## 🌐 Live Cloudflare Workers Endpoint
+## 🌐 Remote Cloudflare Workers Endpoints
 
-- **Base URL:** `https://glb-compressor-mcp.pagalirepagali.workers.dev`
-- **Streamable HTTP MCP Endpoint:** `https://glb-compressor-mcp.pagalirepagali.workers.dev/mcp`
-- **SSE Endpoint:** `https://glb-compressor-mcp.pagalirepagali.workers.dev/sse`
+Replace `<your-subdomain>` with your Cloudflare Workers subdomain (e.g., `satyam420` or your account handle):
+
+- **Base URL:** `https://glb-compressor-mcp.<your-subdomain>.workers.dev`
+- **Streamable HTTP MCP Endpoint:** `https://glb-compressor-mcp.<your-subdomain>.workers.dev/mcp`
+- **Legacy SSE Endpoint:** `https://glb-compressor-mcp.<your-subdomain>.workers.dev/sse`
 
 ---
 
@@ -104,11 +110,35 @@ Add to your `mcp_config.json`:
 {
   "mcpServers": {
     "glb-compressor": {
-      "url": "https://glb-compressor-mcp.pagalirepagali.workers.dev/mcp"
+      "url": "https://glb-compressor-mcp.<your-subdomain>.workers.dev/mcp"
     }
   }
 }
 ```
+
+---
+
+## ☕ Support & Sponsor
+
+If you find **GLB Compressor MCP** helpful and want to support its maintenance:
+
+<div align="center">
+
+<a href="https://buymeacoffee.com/satyam404" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" />
+</a>
+
+<br/><br/>
+
+<a href="https://buymeacoffee.com/satyam404" target="_blank">
+  <img src="./assets/bmc_qr.png" alt="Scan to Buy Me A Coffee" width="170" style="border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.15);" />
+</a>
+
+<br/>
+
+<sub>Scan the QR code or click the button above to buy me a coffee! Thank you for your support! ☕✨</sub>
+
+</div>
 
 ---
 
