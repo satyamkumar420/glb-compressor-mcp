@@ -4,68 +4,71 @@
 
 # ⚡ GLB Compressor MCP Server
 
-> High-fidelity 3D model compression and optimization Model Context Protocol (MCP) server with **zero visual quality degradation**. Deployable natively to **Cloudflare Workers** (Streamable HTTP / SSE) or locally as a stdio MCP server.
+> High-fidelity, local 3D model compression and optimization Model Context Protocol (MCP) server with **zero visual quality degradation** and **instant live auto-reload**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Cloudflare Workers](https://img.shields.io/badge/Deploy-Cloudflare%20Workers-orange.svg)](https://workers.cloudflare.com/)
-[![Protocol](https://img.shields.io/badge/Protocol-MCP%20Streamable%20HTTP%20%2F%20SSE-brightgreen.svg)](https://modelcontextprotocol.io/)
+[![Runtime: Node.js](https://img.shields.io/badge/Runtime-Node.js%20%7C%20TSX-green.svg)](https://nodejs.org/)
+[![Protocol](https://img.shields.io/badge/Protocol-MCP%20Stdio%20Transport-brightgreen.svg)](https://modelcontextprotocol.io/)
 
 ---
 
 ## 🌟 Highlights
 
-- **🛡️ 100% Visual Quality Preservation:** Preserves silhouette, vertex attributes, polygons, and textures without destructive loss. Zero triangle loss by default.
-- **⚡ Dual Runtime Support:**
-  - **Cloudflare Workers Edge Server:** Operates serverless via WebAssembly Meshoptimizer, handling remote assets via URL or Base64 over Streamable HTTP and SSE (`/mcp`, `/sse`).
-  - **Local Node.js Stdio Server:** Direct filesystem access for local batch folder compression and sharp texture encoding.
-- **📦 Multi-format 3D Support:** Reads `.glb` and multi-file `.gltf` (with `.bin` and textures), consolidating and outputting highly optimized binary `.glb`.
+- **🛡️ 100% Visual Quality Preservation:** Preserves silhouette, vertex attributes, polygons, and textures without destructive loss. Zero polygon loss by default (`simplify: false`).
+- **⚡ Live Auto-Reload (No Manual Builds):** Executes directly via TypeScript (`tsx`). Any changes made in `src/` take effect immediately without requiring `tsc` or `build` commands.
+- **🎬 Full Animation & Rigging Safeguards:** Smart Pruning protects skeletons, bones, and animation tracks from accidental deletion. High-precision keyframe resampling (`tolerance: 1e-4`) retains smooth motion curves.
+- **📦 Multi-Format 3D Support:** Reads `.glb` and multi-file `.gltf` (with separate `.bin` buffers and image textures), consolidating and outputting highly optimized binary `.glb`.
 - **🚀 Advanced Pipeline:**
   - Meshopt WebAssembly geometry compression (`EXT_meshopt_compression`)
   - Google Draco compression (`KHR_draco_mesh_compression`)
   - Duplicate vertex welding (`weld`)
-  - Unused node, mesh, and buffer pruning (`prune`)
+  - Unused node, mesh, and buffer pruning (`prune`) with animation/skin protection
   - Accessor and texture deduplication (`dedup`)
   - Animation keyframe resampling (`resample`)
   - GPU vertex cache & fetch reordering (`reorder`)
-  - High-fidelity WebP texture compression (`EXT_texture_webp`)
-
----
-
-## 🌐 Remote Cloudflare Workers Endpoints
-
-Replace `<your-subdomain>` with your Cloudflare Workers subdomain (e.g., `satyam420` or your account handle):
-
-- **Base URL:** `https://glb-compressor-mcp.<your-subdomain>.workers.dev`
-- **Streamable HTTP MCP Endpoint:** `https://glb-compressor-mcp.<your-subdomain>.workers.dev/mcp`
-- **Legacy SSE Endpoint:** `https://glb-compressor-mcp.<your-subdomain>.workers.dev/sse`
+  - High-fidelity WebP texture compression (`EXT_texture_webp`) via native `sharp`
 
 ---
 
 ## 🛠️ MCP Tools Overview
 
 ### 1. `compress_glb`
-Compresses and optimizes a 3D model from a public URL or Base64 string with guaranteed geometry fidelity.
+Compresses and optimizes a 3D model from a local file path (`.glb` or `.gltf`) with guaranteed geometry fidelity.
 - **Arguments:**
-  - `url` *(string, optional)*: Direct HTTP/HTTPS download link of `.glb`
-  - `base64` *(string, optional)*: Base64 string of `.glb` data
-  - `preset` *(enum)*: `"high_quality"` (default), `"lossless"`, `"balanced"`
-  - `includeBase64Output` *(boolean, default: true)*: Returns Base64 of compressed GLB.
+  - `inputPath` *(string, required)*: Path to the `.glb` or `.gltf` file
+  - `outputPath` *(string, optional)*: Destination path (defaults to `<name>.compressed.glb`)
+  - `preset` *(enum)*: `"high_quality"` (default), `"lossless"`, `"balanced"`, `"aggressive"`, `"custom"`
+  - `meshCompression` *(enum)*: `"meshopt"` (default), `"draco"`, `"none"`
+  - `textureQuality` *(number, 1-100)*: WebP quality (default: `90`)
+  - `overwrite` *(boolean)*: Whether to overwrite the input file
 
-### 2. `inspect_glb`
+### 2. `convert_gltf_to_glb`
+Packs multi-file `.gltf` files with external `.bin` buffers and image textures into a single self-contained optimized `.glb`.
+- **Arguments:**
+  - `inputPath` *(string, required)*: Path to the source `.gltf` file
+  - `outputPath` *(string, optional)*: Destination `.glb` path
+  - `compress` *(boolean)*: Whether to compress while bundling (default: `true`)
+  - `preset` *(enum)*: `"high_quality"` (default), `"lossless"`, `"balanced"`
+
+### 3. `batch_compress_glb`
+Recursively or flatly traverses a local folder to compress all `.glb` and `.gltf` files in-place or into `.compressed.glb`.
+- **Arguments:**
+  - `directoryPath` *(string, required)*: Target folder path
+  - `recursive` *(boolean)*: Whether to search subdirectories (default: `true`)
+  - `preset` *(enum)*: Compression preset
+  - `overwrite` *(boolean)*: Overwrite original files
+
+### 4. `inspect_glb`
 Inspects 3D asset metadata without modifying it.
 - **Arguments:**
-  - `url` *(string, optional)*
-  - `base64` *(string, optional)*
-- **Outputs:** Polygon count, vertices, textures breakdown, animations, materials, and extensions used.
+  - `filePath` *(string, required)*: Path to `.glb` or `.gltf` file
+- **Outputs:** Polygon count, vertices, textures breakdown, animations, skins, materials, and extensions used.
 
-### 3. `compare_glb` *(Local Engine)*
-Compares original vs compressed models to verify exact polygon counts and byte savings.
-
-### 4. `batch_compress_glb` *(Local Engine)*
-Recursively traverses a local folder to compress all `.glb` and `.gltf` files in-place or into `.compressed.glb`.
-
-### 5. `convert_gltf_to_glb` *(Local Engine)*
-Packs multi-file `.gltf` files with external `.bin` and image textures into a single self-contained optimized `.glb`.
+### 5. `compare_glb`
+Compares original vs compressed models to verify exact polygon counts, texture retention, and byte savings.
+- **Arguments:**
+  - `originalPath` *(string, required)*
+  - `compressedPath` *(string, required)*
 
 ---
 
@@ -86,35 +89,35 @@ pnpm build
 pnpm test
 ```
 
-### Run Locally (Dev)
+### Development Mode (Direct TSX)
 
 ```bash
-pnpm wrangler dev --port 8789
-```
-
-### Deploy to Cloudflare Workers
-
-```bash
-pnpm wrangler deploy
+pnpm dev
 ```
 
 ---
 
-## ⚙️ Configuration in MCP Clients
+## ⚙️ MCP Client Configuration
 
-### Claude Desktop / AGY / Custom MCP Clients
+### Claude Desktop / AGY / Cursor / Windsurf
 
-Add to your `mcp_config.json`:
+Add the following to your `mcp_config.json`:
 
 ```json
 {
   "mcpServers": {
     "glb-compressor": {
-      "url": "https://glb-compressor-mcp.<your-subdomain>.workers.dev/mcp"
+      "command": "node",
+      "args": [
+        "/absolute/path/to/glb-compressor-mcp/node_modules/tsx/dist/cli.mjs",
+        "/absolute/path/to/glb-compressor-mcp/src/index.ts"
+      ]
     }
   }
 }
 ```
+
+> **Note:** By executing through `tsx`, any changes made to `src/` immediately take effect without running `build`.
 
 ---
 

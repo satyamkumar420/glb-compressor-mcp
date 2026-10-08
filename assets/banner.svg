@@ -89,9 +89,9 @@
 
   <!-- Header Category Pill -->
   <g transform="translate(300, 75)">
-    <rect width="260" height="30" rx="15" fill="#0F172A" stroke="#38BDF8" stroke-width="1" stroke-opacity="0.5" />
+    <rect width="250" height="30" rx="15" fill="#0F172A" stroke="#38BDF8" stroke-width="1" stroke-opacity="0.5" />
     <circle cx="16" cy="15" r="4" fill="#34D399" />
-    <text x="28" y="19.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#38BDF8" letter-spacing="1.5">CLOUDFLARE WORKERS · MCP</text>
+    <text x="28" y="19.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#38BDF8" letter-spacing="1.5">LOCAL DEV ENGINE · MCP STDIO</text>
   </g>
 
   <!-- Main Title -->
@@ -122,13 +122,13 @@
       <text x="18" y="77" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="500" fill="#64748B">Fast Edge Compression</text>
     </g>
 
-    <!-- Card 3: Cloudflare Edge -->
+    <!-- Card 3: Auto-Reload -->
     <g transform="translate(420, 0)">
       <rect width="195" height="90" rx="12" fill="url(#cardBg)" stroke="#334155" stroke-width="1" />
       <rect x="1" y="1" width="193" height="4" rx="2" fill="#F59E0B" />
-      <text x="18" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#F8FAFC">🌐 Cloudflare</text>
-      <text x="18" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="500" fill="#94A3B8">Streamable HTTP &amp; SSE</text>
-      <text x="18" y="77" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="500" fill="#64748B">Serverless Edge Deploy</text>
+      <text x="18" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#F8FAFC">⚡ Auto-Reload</text>
+      <text x="18" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="500" fill="#94A3B8">Live TSX Runtime</text>
+      <text x="18" y="77" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="500" fill="#64748B">Zero Manual Builds</text>
     </g>
 
     <!-- Card 4: WebAssembly Engine -->
