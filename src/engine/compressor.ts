@@ -166,17 +166,46 @@ function buildMeshCompressionTransform(method: MeshCompressionMethod): Transform
 }
 
 /**
- * Build array of glTF transforms based on verified options
+ * Build array of glTF transforms with strict animation and skin protection
  */
-function buildTransformPipeline(opts: Required<CompressionOptions>): Transform[] {
+function buildTransformPipeline(opts: Required<CompressionOptions>, doc: Document): Transform[] {
   const transforms: Transform[] = [];
+  const root = doc.getRoot();
+  const hasRigOrAnimation = root.listAnimations().length > 0 || root.listSkins().length > 0;
 
-  if (opts.prune) transforms.push(prune());
+  // Safe prune: Never prune skins, animations, or bone nodes
+  if (opts.prune) {
+    if (hasRigOrAnimation) {
+      transforms.push(
+        prune({
+          propertyTypes: [
+            "Mesh",
+            "Primitive",
+            "PrimitiveTarget",
+            "Material",
+            "Texture",
+            "Accessor",
+            "Buffer",
+          ],
+          keepLeaves: true,
+        })
+      );
+    } else {
+      transforms.push(prune());
+    }
+  }
+
   if (opts.dedup) transforms.push(dedup());
-  if (opts.resample) transforms.push(resample());
+
+  // High-precision animation resampling: preserves all TRS channels and curves
+  if (opts.resample && root.listAnimations().length > 0) {
+    transforms.push(resample({ tolerance: 1e-4 }));
+  }
+
   if (opts.weld) transforms.push(weld());
 
-  if (opts.simplify && opts.simplifyRatio < 1.0) {
+  // Only simplify static meshes (never deform rigged meshes/skeletons)
+  if (opts.simplify && opts.simplifyRatio < 1.0 && !hasRigOrAnimation) {
     transforms.push(
       simplify({
         simplifier: MeshoptSimplifier,
@@ -200,19 +229,25 @@ function buildTransformPipeline(opts: Required<CompressionOptions>): Transform[]
 }
 
 /**
- * Resolve target output file path
+ * Resolve target output file path (always outputs .glb)
  */
 function resolveOutputPath(inputPath: string, customOutput?: string, overwrite = false): string {
-  if (overwrite) return inputPath;
   if (customOutput) return customOutput;
   const dir = path.dirname(inputPath);
   const ext = path.extname(inputPath);
   const base = path.basename(inputPath, ext);
+
+  // If input is .gltf, output must always be .glb
+  if (ext.toLowerCase() === ".gltf") {
+    return path.join(dir, `${base}.glb`);
+  }
+
+  if (overwrite) return inputPath;
   return path.join(dir, `${base}.compressed.glb`);
 }
 
 /**
- * Core compress function for .glb and .gltf files
+ * Core compress function for all .glb and .gltf files with animation preservation
  */
 export async function compressGlb(
   inputPath: string,
@@ -228,7 +263,7 @@ export async function compressGlb(
   const doc = await io.read(inputPath);
   const texturesCount = doc.getRoot().listTextures().length;
 
-  const transforms = buildTransformPipeline(opts);
+  const transforms = buildTransformPipeline(opts, doc);
   if (transforms.length > 0) {
     await doc.transform(...transforms);
   }
